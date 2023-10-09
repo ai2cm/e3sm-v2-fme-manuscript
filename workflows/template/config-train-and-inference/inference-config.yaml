@@ -1,0 +1,20 @@
+# this is used when doing inference after training completes
+# in the sbatch-train-and-inference.sh workflow
+experiment_dir: /output
+n_forward_steps: 120
+checkpoint_path: /output/training_checkpoints/best_ckpt.tar
+log_video: true
+save_prediction_files: true
+logging:
+  log_to_screen: true
+  log_to_wandb: true
+  log_to_file: true
+  project: fourcastnet
+  entity: ai2cm
+validation_data:
+  batch_size: 1
+  data_path: /validdata
+  data_type: xarray
+  engine: h5netcdf
+  num_data_workers: 0
+  n_samples: 1

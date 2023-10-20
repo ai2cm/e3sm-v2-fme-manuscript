@@ -12,6 +12,7 @@ import click
 @click.option("--max-epochs", "-m", type=int, multiple=True)
 @click.option("--lr", "-l", type=float, multiple=True)
 @click.option("--config-dir", "-c", type=str)
+@click.option("--submit-script", "-s", type=str, default="../sbatch-scripts/submit.sh")
 @click.option("--image", "-i", type=str)
 @click.option("--data-dir", "-d", type=str)
 @click.option("--time", "-t", type=str, default="06:00:00")
@@ -23,6 +24,7 @@ def main(
     max_epochs,
     lr,
     config_dir,
+    sbatch_scripts_dir,
     image,
     data_dir,
     time,
@@ -42,9 +44,10 @@ def main(
             group_name = f"{group_prefix}-{group_dir}"
         else:
             group_name = group_prefix
+        submit_script = os.path.join(sbatch_scripts_dir, "submit.sh")
         cmd = (
             f"sbatch -J {group_name}-{name_dir} --dependency=singleton -N 1 -t {time} "
-            f"submit.sh -c {subdir} -i {image} -g {group_name} -n {name_dir} -d {data_dir} "
+            f"{submit_script} -c {subdir} -i {image} -g {group_name} -n {name_dir} -d {data_dir} "
             "-t train"
         )
         print(cmd)

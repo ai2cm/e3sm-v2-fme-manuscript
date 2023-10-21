@@ -24,7 +24,7 @@ def main(
     max_epochs,
     lr,
     config_dir,
-    sbatch_scripts_dir,
+    submit_script,
     image,
     data_dir,
     time,
@@ -35,6 +35,9 @@ def main(
     hparams = list(product(batch_size, max_epochs, lr))
     if randomize:
         shuffle(hparams)
+    cwd = os.getcwd()
+    submit_script_dir = os.path.dirname(submit_script)
+    submit_script_fname = os.path.basename(submit_script)
     for bs, epochs, lr in hparams:
         group_dir = f"batch_size{bs}-max_epochs{epochs}"
         name_dir = f"lr{lr:.2e}"
@@ -44,11 +47,11 @@ def main(
             group_name = f"{group_prefix}-{group_dir}"
         else:
             group_name = group_prefix
-        submit_script = os.path.join(sbatch_scripts_dir, "submit.sh")
         cmd = (
+            f"cd {submit_script_dir} && "
             f"sbatch -J {group_name}-{name_dir} --dependency=singleton -N 1 -t {time} "
-            f"{submit_script} -c {subdir} -i {image} -g {group_name} -n {name_dir} -d {data_dir} "
-            "-t train"
+            f"{submit_script_fname} -c {subdir} -i {image} -g {group_name} -n {name_dir} -d {data_dir} "
+            f"-t train && cd {cwd}"
         )
         print(cmd)
         if not debug:

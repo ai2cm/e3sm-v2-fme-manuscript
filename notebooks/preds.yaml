@@ -1,0 +1,6 @@
+baseline:
+  url: /pscratch/sd/j/jpduncan/ai2/datasets/e3smv2-1deg-gaussian-fme-40yr-topo/predictiondata/*.nc
+residual-scaling-75-epochs:
+  url: /pscratch/sd/j/jpduncan/ai2/datasets/e3smv2-1deg-gaussian-fme-40yr/output/prescribed-sst/residual-scaling-75-epochs/autoregressive_predictions.nc
+topo-lr3.00e-04:
+  url: /pscratch/sd/j/jpduncan/ai2/datasets/e3smv2-1deg-gaussian-fme-40yr-topo/output/topo-batch_size8-max_epochs50/lr3.00e-04/autoregressive_predictions.nc

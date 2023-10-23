@@ -1,6 +1,7 @@
 import os
 from typing import Mapping, Optional
 
+import dask
 import numpy as np
 import xarray as xr
 import yaml
@@ -59,4 +60,24 @@ def open_autoregressive_inference(
         )
         .isel(lat=slice(None, None, -1))
     )
+    return ds
+
+
+def open_baseline(
+    path: os.PathLike,
+    start: str,
+    lat_coords: xr.DataArray,
+    step_dim="time",
+    step_freq="6H",
+    calendar="noleap",
+):
+    xr.set_options(keep_attrs=True)
+    ds = xr.open_mfdataset(path)
+    time_coords = xr.cftime_range(
+        start=start, freq=step_freq, periods=len(ds[step_dim]), calendar=calendar
+    )
+    ds["time"] = time_coords
+    with dask.config.set(**{"array.slicing.split_large_chunks": True}):
+        ds = ds.reindex(lat=list(reversed(ds["lat"])))
+    ds["lat"] = lat_coords
     return ds

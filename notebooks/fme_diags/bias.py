@@ -3,6 +3,7 @@ from typing import Optional
 import xarray as xr
 from dask.diagnostics import ProgressBar
 from matplotlib import pyplot as plt
+from matplotlib.colors import TwoSlopeNorm
 
 
 def compute_time_mean_bias(da_pred: xr.DataArray, da_tar: xr.DataArray):
@@ -22,16 +23,19 @@ def plot_time_mean_bias(
     axs_ = axs.flatten()
 
     vmin, vmax = time_mean_bias.min().item(), time_mean_bias.max().item()
+    vmax = max(abs(vmin), abs(vmax))
 
-    time_mean_bias.plot(ax=axs_[0], vmin=vmin, vmax=vmax, add_colorbar=False)
-    im = baseline_time_mean_bias.plot(
-        ax=axs_[1], vmin=vmin, vmax=vmax, add_colorbar=False
+    baseline_time_mean_bias.plot(
+        ax=axs_[0], norm=TwoSlopeNorm(0.0, -vmax, vmax), cmap="bwr", add_colorbar=False
+    )
+    im = time_mean_bias.plot(
+        ax=axs_[1], norm=TwoSlopeNorm(0.0, -vmax, vmax), cmap="bwr", add_colorbar=False
     )
 
-    axs_[0].set_title("Generated")
+    axs_[0].set_title("Baseline")
     axs_[0].set_xlabel("Longitude")
     axs_[0].set_ylabel("Latitude")
-    axs_[1].set_title("Baseline")
+    axs_[1].set_title("Generated")
     axs_[1].set_xlabel("Longitude")
     axs_[1].set_ylabel("")
     axs_[1].yaxis.set_tick_params(labelleft=False)

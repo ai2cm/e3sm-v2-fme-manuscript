@@ -59,6 +59,7 @@ def plot_wavenumber_frequency_spectra(
     ds: xr.Dataset,
     component: Literal["symmetric", "antisymmetric", "total", "background"],
     normalize: bool = True,
+    plot_error: bool = True,
     mjo_zoom: bool = False,
     num_contour_bins=14,
     figsize=(16, 5),
@@ -102,7 +103,8 @@ def plot_wavenumber_frequency_spectra(
     tar_power = tar_power[~np.isnan(tar_power)]
     _, bin_edges = np.histogram(tar_power, bins=num_contour_bins)
 
-    fig, axs = plt.subplots(1, 3, figsize=figsize, layout="constrained")
+    ncol = 3 if plot_error else 2
+    fig, axs = plt.subplots(1, ncol, figsize=figsize, layout="constrained")
     axs_flat = axs.flatten()
 
     _, img, _ = plot_fun(
@@ -133,32 +135,34 @@ def plot_wavenumber_frequency_spectra(
         for source in ds["source"].values:
             power[source] = 10 ** power[source]
 
-    err = 100 * (power["prediction"] - power["target"]) / power["target"]
+    if plot_error:
+        err = 100 * (power["prediction"] - power["target"]) / power["target"]
 
-    # define the colormap for errors
-    cmap = plt.cm.seismic
-    cmap_list = (
-        [cmap(0)] + [cmap(i) for i in range(31, cmap.N, cmap.N // 12)] + [cmap(255)]
-    )
-    # set 0 to white
-    cmap_list[6] = cmap(128)
-    bin_limit = (
-        np.abs(err.sel(wavenumber=slice(-15, 15), frequency=slice(0, None)))
-        .max()
-        .item()
-    )
-    bin_edges = np.linspace(-bin_limit, bin_limit, num=12)
-    _, img, _ = plot_diff_spectrum(
-        err,
-        clevs=bin_edges,
-        do_zoom=mjo_zoom,
-        rightStr=component,
-        add_colorbar=False,
-        ax=axs_flat[2],
-    )
-    fig.colorbar(
-        img, ax=[axs_flat[2]], label="%", orientation="vertical", location="right"
-    )
+        # define the colormap for errors
+        cmap = plt.cm.seismic
+        cmap_list = (
+            [cmap(0)] + [cmap(i) for i in range(31, cmap.N, cmap.N // 12)] + [cmap(255)]
+        )
+        # set 0 to white
+        cmap_list[6] = cmap(128)
+        bin_limit = (
+            np.abs(err.sel(wavenumber=slice(-15, 15), frequency=slice(0, None)))
+            .max()
+            .item()
+        )
+        bin_edges = np.linspace(-bin_limit, bin_limit, num=12)
+        _, img, _ = plot_diff_spectrum(
+            err,
+            clevs=bin_edges,
+            do_zoom=mjo_zoom,
+            rightStr=component,
+            add_colorbar=False,
+            ax=axs_flat[2],
+        )
+        fig.colorbar(
+            img, ax=[axs_flat[2]], label="%", orientation="vertical", location="right"
+        )
+
     fig.suptitle(
         "Precipitation rate wavenumber-frequency spectrum"
         f" ({'normalized ' if normalize else ''}{component})"

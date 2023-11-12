@@ -22,7 +22,10 @@ def plot_time_mean_bias(
     vmax_abs=None,
 ):
     fig, axs = plt.subplots(
-        1, 2, figsize=figsize, subplot_kw={"projection": ccrs.PlateCarree()}
+        1,
+        2,
+        figsize=figsize,
+        subplot_kw={"projection": ccrs.PlateCarree()},
     )
     axs_ = axs.flatten()
 
@@ -82,14 +85,20 @@ def plot_time_mean_bias_list(
     var_names: Optional[List[str]] = None,
     figsize=(20, 11),
     vmax_abs=None,
+    axs=None,
 ):
     # assumes that all DataArrays have the same units and uses a shared colorbar
-    fig, axs = plt.subplots(
-        len(time_mean_bias),
-        2,
-        figsize=figsize,
-        subplot_kw={"projection": ccrs.PlateCarree()},
-    )
+    if axs is None:
+        fig, axs = plt.subplots(
+            len(time_mean_bias),
+            2,
+            figsize=figsize,
+            subplot_kw={"projection": ccrs.PlateCarree()},
+        )
+    else:
+        fig = None
+        assert len(axs) == len(time_mean_bias)
+        assert len(axs[0]) == 2
 
     if vmax_abs is None:
         vmin = min([bias.min().item() for bias in time_mean_bias])
@@ -143,15 +152,19 @@ def plot_time_mean_bias_list(
     for ax in axs.flatten():
         ax.coastlines(linewidth=0.5, color="grey", alpha=0.5)
 
-    plt.tight_layout()
+    if fig is not None:
+        plt.tight_layout()
 
-    fig.subplots_adjust(right=0.9)
-    cbar_ax = fig.add_axes([0.92, 0.06, 0.015, 0.84])
-    cbar = fig.colorbar(
-        im,
-        cax=cbar_ax,
-        orientation="vertical",
-    )
-    cbar.set_label(f"Time-mean bias\n[{time_mean_bias[0].units}]", fontsize="x-large")
+        fig.subplots_adjust(right=0.9)
+        cbar_ax = fig.add_axes([0.92, 0.06, 0.015, 0.84])
+        cbar = fig.colorbar(
+            im,
+            cax=cbar_ax,
+            orientation="vertical",
+        )
+        cbar.set_label(
+            f"Time-mean bias\n[{time_mean_bias[0].units}]", fontsize="x-large"
+        )
+        return fig, axs
 
-    return fig, axs
+    return im

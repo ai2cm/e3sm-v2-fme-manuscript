@@ -3,6 +3,7 @@ from typing import Mapping, Optional
 
 import dask
 import numpy as np
+import pandas as pd
 import xarray as xr
 import yaml
 
@@ -81,3 +82,27 @@ def open_baseline(
         ds = ds.reindex(lat=list(reversed(ds["lat"])))
     ds["lat"] = lat_coords
     return ds
+
+
+def load_global_time_mean_metrics(
+    wandb_run,
+    keys_stem: str,
+    vars_dict: dict,
+    run_label: Optional[str] = None,
+    apply_funcs: Optional[dict] = None,
+):
+    keys = {f"{keys_stem}/{name}": label for name, label in vars_dict.items()}
+    metric_names = list(keys.keys())
+    metrics = (
+        wandb_run.history(keys=metric_names, samples=1)
+        .rename(dict(zip(metric_names, vars_dict.keys())), axis=1)
+        .drop("_step", axis=1)
+    )
+    if apply_funcs is not None:
+        for name, func in apply_funcs.items():
+            metrics[name] = metrics[name].apply(func)
+    if run_label is not None:
+        metrics.index = [run_label]
+    return metrics.T.join(
+        pd.DataFrame.from_dict(vars_dict, orient="index", columns=["label"])
+    )

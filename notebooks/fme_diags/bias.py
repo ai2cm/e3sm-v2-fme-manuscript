@@ -20,6 +20,7 @@ def plot_time_mean_bias(
     var_name: Optional[str] = None,
     figsize=(20, 6),
     vmax_abs=None,
+    verbose=False,
 ):
     fig, axs = plt.subplots(
         1,
@@ -31,6 +32,9 @@ def plot_time_mean_bias(
 
     if vmax_abs is None:
         vmin, vmax = time_mean_bias.min().item(), time_mean_bias.max().item()
+        if verbose:
+            print(f"Time-mean bias minimum: {vmin:0.4f}")
+            print(f"Time-mean bias maximum: {vmax:0.4f}")
         vmax_abs = max(abs(vmin), abs(vmax))
 
     im = baseline_time_mean_bias.plot(
@@ -86,6 +90,7 @@ def plot_time_mean_bias_list(
     figsize=(20, 11),
     vmax_abs=None,
     axs=None,
+    verbose=False,
 ):
     # assumes that all DataArrays have the same units and uses a shared colorbar
     if axs is None:
@@ -101,11 +106,21 @@ def plot_time_mean_bias_list(
         assert len(axs[0]) == 2
 
     if vmax_abs is None:
-        vmin = min([bias.min().item() for bias in time_mean_bias])
-        vmax = max([bias.max().item() for bias in time_mean_bias])
-        vmax_abs = max(abs(vmin), abs(vmax))
+        vmins = [bias.min().item() for bias in time_mean_bias]
+        vmaxs = [bias.max().item() for bias in time_mean_bias]
+        vmax_abs = max(abs(min(vmins)), abs(max(vmaxs)))
+    else:
+        verbose = False
 
     for i, bias in enumerate(time_mean_bias):
+        if verbose:
+            prefix = (
+                f"time_mean_bias[i]"
+                if var_names is None
+                else f"Time-mean {var_names[i]} bias"
+            )
+            print(f"{prefix} minimum: {vmins[i]:0.4f}")
+            print(f"{prefix} maximum: {vmaxs[i]:0.4f}")
         baseline_time_mean_bias[i].plot(
             ax=axs[i][0],
             norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),

@@ -14,6 +14,30 @@ def load_config(path: os.PathLike):
     return config_data
 
 
+def get_run_path(config: dict, key: str):
+    run_config = config["runs"][key]
+    base_dir = run_config.get("dataset_dir", config["dataset_dir"])
+    dset_name = run_config["dataset"]
+    group = run_config["group"]
+    name = run_config["name"]
+    return os.path.join(
+        base_dir, dset_name, "output", group, name, "autoregressive_predictions.nc"
+    )
+
+
+def get_run_kwargs(config: dict, key: str):
+    run_config = config["runs"][key]
+    return {
+        "path": get_run_path(config, key),
+        "start": run_config.get("start", config["start"]),
+        "step_dim": run_config.get("step_dim", config["step_dim"]),
+        "step_freq": run_config.get(config["step_freq"], config["step_freq"]),
+        "calendar": run_config.get("calendar", config["calendar"]),
+        "flip_lat": run_config.get("flip_lat", config["flip_lat"]),
+        "chunks": run_config.get("chunks", config["chunks"]),
+    }
+
+
 def open_autoregressive_inference(
     path: os.PathLike,
     start: str,

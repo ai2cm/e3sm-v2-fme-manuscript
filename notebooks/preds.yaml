@@ -1,17 +1,102 @@
-runs:
+dataset_dir: /pscratch/sd/j/jpduncan/ai2/datasets
+wandb_entity: ai2cm
+wandb_project: fourcastnet-e3smv2
+flip_lat: false
+start: "0054-01-01"
+step_dim: lead
+step_freq: 6H
+calendar: noleap
+chunks:
+  lead: 178
+reference:
   baseline:
     url: /pscratch/sd/j/jpduncan/ai2/datasets/e3smv2-1deg-gaussian-fme-40yr-topo/predictiondata/*.nc
     inference_run_id: s99o1r1p
-  residual-scaling-75-epochs:
-    url: /pscratch/sd/j/jpduncan/ai2/datasets/e3smv2-1deg-gaussian-fme-40yr/output/prescribed-sst/residual-scaling-75-epochs/autoregressive_predictions.nc
-    training_run_id: 70ptxzqe
-    inference_run_id: mvn4dgvm
-  topo-lr3.00e-04:
-    url: /pscratch/sd/j/jpduncan/ai2/datasets/e3smv2-1deg-gaussian-fme-40yr-topo/output/topo-batch_size8-max_epochs50/lr3.00e-04/autoregressive_predictions.nc
+  42-years-training-set-reference:
+    url: /pscratch/sd/j/jpduncan/ai2/datasets/2023-11-22-e3smv2-vertically-resolved-1deg-fme-dataset/predictiondata/*.nc
+    inference_run_id: f1yp2ftm
+  with-hgt-sfc-frac-august-10yr:
+    wandb_project: fourcastnet
+    inference_run_id: 48k4y6kk
+runs:
+  topo-batch_size8-max_epochs50-lr3.00e-04:
+    dataset: e3smv2-1deg-gaussian-fme-40yr-topo
+    group: topo-batch_size8-max_epochs50
+    name: lr3.00e-04
     training_run_id: czwni65s
     inference_run_id: ffg3mog9
-  with-hgt-sfc-frac-august-10yr:
-    inference_run_id: 48k4y6kk
+    step_dim: timestep
+    start: "0031-01-01"
+  topo-batch_size8-max_epochs50-lr4.00e-04:
+    dataset: e3smv2-1deg-gaussian-fme-40yr-topo
+    group: topo-batch_size8-max_epochs50
+    name: lr4.00e-04
+    training_run_id: 0gyyoec0
+    inference_run_id: amdglseo
+    step_dim: timestep
+    start: "0031-01-01"
+  topo-batch_size8-max_epochs50-lr5.00e-04:
+    dataset: e3smv2-1deg-gaussian-fme-40yr-topo
+    group: topo-batch_size8-max_epochs50
+    name: lr5.00e-04
+    training_run_id: h9t2fehx
+    inference_run_id: e78c84rl
+    step_dim: timestep
+    start: "0031-01-01"
+  topo-batch_size16-max_epochs50-lr5.00e-04:
+    dataset: e3smv2-1deg-gaussian-fme-40yr-topo
+    group: topo-batch_size16-max_epochs50
+    name: lr5.00e-04
+    training_run_id: 5vf4jiwm
+    inference_run_id: ub743qd7
+    step_dim: timestep
+    start: "0031-01-01"
+  topo-batch_size16-max_epochs75-lr5.00e-04:
+    dataset: e3smv2-1deg-gaussian-fme-40yr-topo
+    group: topo-batch_size16-max_epochs75
+    name: lr5.00e-04
+    training_run_id: 9gnbicv7
+    inference_run_id: 18a3vlq0
+    step_dim: timestep
+    start: "0031-01-01"
+  prescribed-sst-topo-lr5e-4:
+    dataset: e3smv2-1deg-gaussian-fme-40yr-topo
+    group: prescribed-sst
+    name: topo-lr5e-4
+    training_run_id: 3q50b4qi
+    inference_run_id: s5gxrano
+    step_dim: timestep
+    start: "0031-01-01"
+  residual-scaling-75-epochs:
+    dataset: e3smv2-1deg-gaussian-fme-40yr
+    group: prescribed-sst
+    name: residual-scaling-75-epochs
+    training_run_id: 70ptxzqe
+    inference_run_id: mvn4dgvm
+    step_dim: timestep
+    start: "0031-01-01"
+    flip_lat: true
+  42yrs-batch_size8-max_epochs50-lr3e-4-run0:
+    dataset: 2023-11-22-e3smv2-vertically-resolved-1deg-fme-dataset
+    group: 42-years-training-set
+    name: 42yrs-batch_size8-max_epochs50-lr3e-4-run0
+    inference_run_id: 3q8nt30o
+  42yrs-batch_size8-max_epochs50-lr3e-4-run1:
+    dataset: 2023-11-22-e3smv2-vertically-resolved-1deg-fme-dataset
+    group: 42-years-training-set
+    name: 42yrs-batch_size8-max_epochs50-lr3e-4-run1
+    inference_run_id: pe0z8mz8
+  42yrs-batch_size8-max_epochs50-lr3e-4-run4:
+    dataset: 2023-11-22-e3smv2-vertically-resolved-1deg-fme-dataset
+    group: 42-years-training-set
+    name: 42yrs-batch_size8-max_epochs50-lr3e-4-run4
+    inference_run_id: 16ix0826
+  fv3gfs-0shot-42yrs-batch_size8-max_epochs50-lr3e-4-run0:
+    dataset: 2023-12-03-fv3gfs
+    group: fv3gfs-0shot
+    name: fv3gfs-0shot-42yrs-batch_size8-max_epochs50-lr3e-4-run0
+    inference_run_id: igb8x3mu
+    start_date: 2021-01-01
 wandb_metrics:
   inference:
     bias: inference/time_mean/bias

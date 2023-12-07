@@ -8,7 +8,7 @@ step_freq: 6H
 calendar: noleap
 chunks:
   lead: 178
-reference:
+runs:
   baseline:
     url: /pscratch/sd/j/jpduncan/ai2/datasets/e3smv2-1deg-gaussian-fme-40yr-topo/predictiondata/*.nc
     inference_run_id: s99o1r1p
@@ -18,7 +18,9 @@ reference:
   with-hgt-sfc-frac-august-10yr:
     wandb_project: fourcastnet
     inference_run_id: 48k4y6kk
-runs:
+  retrain-30e-rs1-10yr-ema:
+    wandb_project: fourcastnet
+    inference_run_id: 3xahrzsb
   topo-batch_size8-max_epochs50-lr3.00e-04:
     dataset: e3smv2-1deg-gaussian-fme-40yr-topo
     group: topo-batch_size8-max_epochs50
@@ -96,7 +98,8 @@ runs:
     group: fv3gfs-0shot
     name: fv3gfs-0shot-42yrs-batch_size8-max_epochs50-lr3e-4-run0
     inference_run_id: igb8x3mu
-    start_date: 2021-01-01
+    start: "2021-01-01"
+    calendar: standard
 wandb_metrics:
   inference:
     bias: inference/time_mean/bias

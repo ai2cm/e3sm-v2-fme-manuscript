@@ -38,6 +38,17 @@ def get_run_kwargs(config: dict, key: str):
     }
 
 
+def get_wandb_path(config: dict, key: str, inference=True):
+    run_config = config["runs"][key]
+    entity = run_config.get("wandb_entity", config["wandb_entity"])
+    project = run_config.get("wandb_project", config["wandb_project"])
+    if inference:
+        run_id = run_config["inference_run_id"]
+    else:
+        run_id = run_config["training_run_id"]
+    return os.path.join(entity, project, run_id)
+
+
 def open_autoregressive_inference(
     path: os.PathLike,
     start: str,
@@ -88,7 +99,7 @@ def open_autoregressive_inference(
     return ds
 
 
-def open_baseline(
+def open_reference(
     path: os.PathLike,
     start: str,
     lat_coords: xr.DataArray,

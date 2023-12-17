@@ -1,7 +1,40 @@
 from typing import Optional
 
+import numpy as np
 import xarray as xr
 from matplotlib import pyplot as plt
+
+
+def compute_daily_anomalies(
+    da: xr.DataArray, time_mean: xr.DataArray = None, smoothed=True
+):
+    if time_mean is None:
+        time_mean = da.mean(dim="time")
+    da = da - time_mean
+    da_daily = da.resample(time="1D").mean("time").compute()
+    if smoothed:
+        # TODO: compute daily mean climatologies before smoothing?
+        # import pdb
+
+        # pdb.set_trace()
+        da_daily_fft = np.fft.rfft(da_daily.values, axis=-3)
+        # first 3 harmonics unaltered
+        # taper, following NCL smthClmDayTLL
+        da_daily_fft[..., 3, :, :] = 0.5 * da_daily_fft[..., 3, :, :]
+        da_daily_fft[..., 4:, :, :] = 0.0
+        da_daily = xr.DataArray(
+            np.fft.irfft(da_daily_fft, n=len(da_daily["time"]), axis=-3),
+            coords=da_daily.coords,
+            dims=da_daily.dims,
+        )
+    da_daily = da_daily.groupby("time.dayofyear")
+    return da.groupby("time.dayofyear") - da_daily.mean("time")
+
+
+def remove_rolling_mean(da: xr.DataArray, ndays=120, samples_per_day=4):
+    window_len = ndays * samples_per_day
+    rollmean = da.rolling(time=window_len, center=False).mean()
+    return (da - rollmean).isel(time=slice(window_len, None))
 
 
 def plot_hovmoller_by_lon(
@@ -9,14 +42,15 @@ def plot_hovmoller_by_lon(
     var_name: Optional[str] = None,
     figsize=(6, 12),
     time_label="Simulation time",
+    **plot_kwargs,
 ):
     fig, axs = plt.subplots(1, 2, figsize=figsize, sharey=True)
 
-    vmin, vmax = da.min(), da.max()
-
-    da.sel(source="target").plot(ax=axs[0], vmin=vmin, vmax=vmax, add_colorbar=False)
+    da.sel(source="target").plot(ax=axs[0], add_colorbar=False, **plot_kwargs)
     im = da.sel(source="prediction").plot(
-        ax=axs[1], vmin=vmin, vmax=vmax, add_colorbar=False
+        ax=axs[1],
+        add_colorbar=False,
+        **plot_kwargs,
     )
 
     axs[0].set_title("Target")

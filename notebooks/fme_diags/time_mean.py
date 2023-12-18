@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 import cartopy.crs as ccrs
+import numpy as np
 import xarray as xr
 from dask.diagnostics import ProgressBar
 from matplotlib import pyplot as plt
@@ -14,40 +15,54 @@ def compute_time_mean_bias(da_pred: xr.DataArray, da_tar: xr.DataArray):
     return time_mean_bias
 
 
-def plot_time_mean_bias(
-    time_mean_bias: xr.DataArray,
-    baseline_time_mean_bias: xr.DataArray,
+def compute_time_mean_rmse(da_pred: xr.DataArray, da_tar: xr.DataArray):
+    rmse = np.sqrt((da_pred - da_tar) ** 2)
+    with ProgressBar():
+        time_mean_rmse = rmse.mean("time").compute()
+    return time_mean_rmse
+
+
+def plot_time_mean(
+    time_mean: xr.DataArray,
+    baseline_time_mean: xr.DataArray,
     var_name: Optional[str] = None,
+    metric_name: Optional[str] = None,
     figsize=(20, 6),
-    vmax_abs=None,
-    verbose=False,
+    axs=None,
+    **plot_kwargs,
 ):
-    fig, axs = plt.subplots(
-        1,
-        2,
-        figsize=figsize,
-        subplot_kw={"projection": ccrs.PlateCarree()},
-    )
+    if axs is None:
+        fig, axs = plt.subplots(
+            1,
+            2,
+            figsize=figsize,
+            subplot_kw={"projection": ccrs.PlateCarree()},
+        )
+    else:
+        fig = None
+        assert len(axs) == 2
+
     axs_ = axs.flatten()
 
-    if vmax_abs is None:
-        vmin, vmax = time_mean_bias.min().item(), time_mean_bias.max().item()
-        if verbose:
-            print(f"Time-mean bias minimum: {vmin:0.4f}")
-            print(f"Time-mean bias maximum: {vmax:0.4f}")
-        vmax_abs = max(abs(vmin), abs(vmax))
+    if metric_name is None:
+        metric_name = ""
+    else:
+        metric_name = metric_name + " "
 
-    im = baseline_time_mean_bias.plot(
+    if var_name is None:
+        var_name = ""
+    else:
+        var_name = var_name + " "
+
+    im = baseline_time_mean.plot(
         ax=axs_[0],
-        norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),
-        cmap="RdBu_r",
         add_colorbar=False,
+        **plot_kwargs,
     )
-    time_mean_bias.plot(
+    time_mean.plot(
         ax=axs_[1],
-        norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),
-        cmap="RdBu_r",
         add_colorbar=False,
+        **plot_kwargs,
     )
 
     for ax in axs_:
@@ -63,30 +78,81 @@ def plot_time_mean_bias(
 
     plt.tight_layout()
 
-    fig.subplots_adjust(right=0.9)
-    cbar_ax = fig.add_axes([0.92, 0.06, 0.015, 0.84])
+    if fig is not None:
+        fig.subplots_adjust(right=0.9)
+        cbar_ax = fig.add_axes([0.92, 0.06, 0.015, 0.84])
 
-    if var_name is None:
-        var_name = ""
-    else:
-        var_name = var_name + " "
-
-    cbar = fig.colorbar(
-        im,
-        cax=cbar_ax,
-        orientation="vertical",
-    )
-    cbar.set_label(
-        f"Time-mean {var_name}bias\n[{time_mean_bias.units}]", fontsize="large"
-    )
+        cbar = fig.colorbar(
+            im,
+            cax=cbar_ax,
+            orientation="vertical",
+        )
+        cbar.set_label(
+            f"Time-mean {var_name}{metric_name}\n[{time_mean.units}]",
+            fontsize="x-large",
+        )
 
     return fig, axs
 
 
-def plot_time_mean_bias_list(
-    time_mean_bias: List[xr.DataArray],
-    baseline_time_mean_bias: List[xr.DataArray],
+def plot_time_mean_bias(
+    time_mean_bias: xr.DataArray,
+    baseline_time_mean_bias: xr.DataArray,
+    var_name: Optional[str] = None,
+    figsize=(20, 6),
+    vmax_abs=None,
+    verbose=False,
+):
+    vmin, vmax = time_mean_bias.min().item(), time_mean_bias.max().item()
+    vmax_abs = max(abs(vmin), abs(vmax))
+    norm = TwoSlopeNorm(0.0, -vmax_abs, vmax_abs)
+    cmap = "RdBu_r"
+    if verbose:
+        print(f"Time-mean bias minimum: {vmin:0.8f}")
+        print(f"Time-mean bias maximum: {vmax:0.8f}")
+    fig, axs = plot_time_mean(
+        time_mean_bias,
+        baseline_time_mean_bias,
+        var_name=var_name,
+        metric_name="bias",
+        figsize=figsize,
+        verbose=verbose,
+        norm=norm,
+        cmap=cmap,
+    )
+    return fig, axs
+
+
+def plot_time_mean_rmse(
+    time_mean_rmse: xr.DataArray,
+    baseline_time_mean_rmse: xr.DataArray,
+    var_name: Optional[str] = None,
+    figsize=(20, 6),
+    verbose=False,
+):
+    vmin, vmax = time_mean_rmse.min().item(), time_mean_rmse.max().item()
+    cmap = "inferno"
+    if verbose:
+        print(f"Time-mean bias minimum: {vmin:0.8f}")
+        print(f"Time-mean bias maximum: {vmax:0.8f}")
+    fig, axs = plot_time_mean(
+        time_mean_rmse,
+        baseline_time_mean_rmse,
+        var_name=var_name,
+        metric_name="rmse",
+        figsize=figsize,
+        vmin=vmin,
+        vmax=vmax,
+        cmap=cmap,
+    )
+    return fig, axs
+
+
+def plot_time_mean_list(
+    time_mean: List[xr.DataArray],
+    baseline_time_mean: List[xr.DataArray],
     var_names: Optional[List[str]] = None,
+    metric_name: Optional[str] = None,
     figsize=(20, 11),
     vmax_abs=None,
     axs=None,
@@ -95,33 +161,36 @@ def plot_time_mean_bias_list(
     # assumes that all DataArrays have the same units and uses a shared colorbar
     if axs is None:
         fig, axs = plt.subplots(
-            len(time_mean_bias),
+            len(time_mean),
             2,
             figsize=figsize,
             subplot_kw={"projection": ccrs.PlateCarree()},
         )
     else:
         fig = None
-        assert len(axs) == len(time_mean_bias)
+        assert len(axs) == len(time_mean)
         assert len(axs[0]) == 2
 
     if vmax_abs is None:
-        vmins = [bias.min().item() for bias in time_mean_bias]
-        vmaxs = [bias.max().item() for bias in time_mean_bias]
+        vmins = [bias.min().item() for bias in time_mean]
+        vmaxs = [bias.max().item() for bias in time_mean]
         vmax_abs = max(abs(min(vmins)), abs(max(vmaxs)))
     else:
         verbose = False
 
-    for i, bias in enumerate(time_mean_bias):
+    if metric_name is None:
+        metric_name = ""
+
+    for i, bias in enumerate(time_mean):
         if verbose:
             prefix = (
-                f"time_mean_bias[i]"
+                f"time_mean[i] {metric_name}"
                 if var_names is None
-                else f"Time-mean {var_names[i]} bias"
+                else f"Time-mean {var_names[i]} {metric_name}"
             )
-            print(f"{prefix} minimum: {vmins[i]:0.4f}")
-            print(f"{prefix} maximum: {vmaxs[i]:0.4f}")
-        baseline_time_mean_bias[i].plot(
+            print(f"{prefix} minimum: {vmins[i]:0.8f}")
+            print(f"{prefix} maximum: {vmaxs[i]:0.8f}")
+        baseline_time_mean[i].plot(
             ax=axs[i][0],
             norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),
             cmap="RdBu_r",
@@ -140,13 +209,13 @@ def plot_time_mean_bias_list(
             axs[i][0].set_title("")
             axs[i][1].set_title("")
 
-        if i < len(time_mean_bias) - 1:
+        if i < len(time_mean) - 1:
             axs[i][0].set_xlabel("")
             axs[i][1].set_xlabel("")
             axs[i][0].xaxis.set_tick_params(length=0, labelbottom=False)
             axs[i][1].xaxis.set_tick_params(length=0, labelbottom=False)
 
-        if i == len(time_mean_bias) - 1:
+        if i == len(time_mean) - 1:
             axs[i][0].set_xlabel("Longitude", fontsize="large")
             axs[i][1].set_xlabel("Longitude", fontsize="large")
 
@@ -178,8 +247,52 @@ def plot_time_mean_bias_list(
             orientation="vertical",
         )
         cbar.set_label(
-            f"Time-mean bias\n[{time_mean_bias[0].units}]", fontsize="x-large"
+            f"Time-mean {metric_name}\n[{time_mean[0].units}]", fontsize="x-large"
         )
         return fig, axs
 
     return im
+
+
+def plot_time_mean_bias_list(
+    time_mean_bias: List[xr.DataArray],
+    baseline_time_mean_bias: List[xr.DataArray],
+    var_names: Optional[List[str]] = None,
+    figsize=(20, 11),
+    vmax_abs=None,
+    axs=None,
+    verbose=False,
+):
+    fig, axs = plot_time_mean_list(
+        time_mean_bias,
+        baseline_time_mean_bias,
+        var_names=var_names,
+        metric_name="bias",
+        figsize=figsize,
+        vmax_abs=vmax_abs,
+        axs=axs,
+        verbose=verbose,
+    )
+    return fig, axs
+
+
+def plot_time_mean_rmse_list(
+    time_mean_rmse: List[xr.DataArray],
+    baseline_time_mean_rmse: List[xr.DataArray],
+    var_names: Optional[List[str]] = None,
+    figsize=(20, 11),
+    vmax_abs=None,
+    axs=None,
+    verbose=False,
+):
+    fig, axs = plot_time_mean_list(
+        time_mean_rmse,
+        baseline_time_mean_rmse,
+        var_names=var_names,
+        metric_name="rmse",
+        figsize=figsize,
+        vmax_abs=vmax_abs,
+        axs=axs,
+        verbose=verbose,
+    )
+    return fig, axs

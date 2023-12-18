@@ -45,28 +45,12 @@ runs:
     inference_run_id: e78c84rl
     step_dim: timestep
     start: "0031-01-01"
-  topo-batch_size16-max_epochs50-lr5.00e-04:
-    dataset: e3smv2-1deg-gaussian-fme-40yr-topo
-    group: topo-batch_size16-max_epochs50
-    name: lr5.00e-04
-    training_run_id: 5vf4jiwm
-    inference_run_id: ub743qd7
-    step_dim: timestep
-    start: "0031-01-01"
   topo-batch_size16-max_epochs75-lr5.00e-04:
     dataset: e3smv2-1deg-gaussian-fme-40yr-topo
     group: topo-batch_size16-max_epochs75
     name: lr5.00e-04
     training_run_id: 9gnbicv7
     inference_run_id: 18a3vlq0
-    step_dim: timestep
-    start: "0031-01-01"
-  prescribed-sst-topo-lr5e-4:
-    dataset: e3smv2-1deg-gaussian-fme-40yr-topo
-    group: prescribed-sst
-    name: topo-lr5e-4
-    training_run_id: 3q50b4qi
-    inference_run_id: s5gxrano
     step_dim: timestep
     start: "0031-01-01"
   residual-scaling-75-epochs:
@@ -93,6 +77,11 @@ runs:
     group: 42-years-training-set
     name: 42yrs-batch_size8-max_epochs50-lr3e-4-run4
     inference_run_id: 16ix0826
+  42yrs-batch_size8-max_epochs50-lr3e-4-run4-ema:
+    dataset: 2023-11-22-e3smv2-vertically-resolved-1deg-fme-dataset
+    group: 42-years-training-set
+    name: 42yrs-batch_size8-max_epochs50-lr3e-4-run4-ema
+    inference_run_id: 3hvzyhgv
   fv3gfs-0shot-42yrs-batch_size8-max_epochs50-lr3e-4-run0:
     dataset: 2023-12-03-fv3gfs
     group: fv3gfs-0shot

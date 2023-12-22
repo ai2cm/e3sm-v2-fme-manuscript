@@ -22,6 +22,29 @@ def compute_time_mean_rmse(da_pred: xr.DataArray, da_tar: xr.DataArray):
     return time_mean_rmse
 
 
+def compute_global_time_mean_bias(
+    bias: xr.DataArray, area_weights: Optional[xr.DataArray] = None
+):
+    if "time" in bias.dims:
+        with ProgressBar():
+            bias = bias.mean("time")
+    if area_weights is not None:
+        bias = bias.weighted(area_weights)
+    return bias.mean(["lat", "lon"]).compute().item()
+
+
+def compute_rmse_of_global_time_mean_bias(
+    bias: xr.DataArray, area_weights: Optional[xr.DataArray] = None
+):
+    if "time" in bias.dims:
+        with ProgressBar():
+            bias = bias.mean("time")
+    bias_sq = bias**2
+    if area_weights is not None:
+        bias_sq = bias_sq.weighted(area_weights)
+    return np.sqrt(bias_sq.mean(["lat", "lon"]).compute().item())
+
+
 def plot_time_mean(
     time_mean: xr.DataArray,
     baseline_time_mean: xr.DataArray,
@@ -104,19 +127,25 @@ def plot_time_mean_bias(
     verbose=False,
 ):
     vmin, vmax = time_mean_bias.min().item(), time_mean_bias.max().item()
-    vmax_abs = max(abs(vmin), abs(vmax))
+    vminb, vmaxb = (
+        baseline_time_mean_bias.min().item(),
+        baseline_time_mean_bias.max().item(),
+    )
+    if vmax_abs is None:
+        vmax_abs = max(abs(vmin), abs(vminb), abs(vmax), abs(vmaxb))
     norm = TwoSlopeNorm(0.0, -vmax_abs, vmax_abs)
     cmap = "RdBu_r"
     if verbose:
-        print(f"Time-mean bias minimum: {vmin:0.8f}")
-        print(f"Time-mean bias maximum: {vmax:0.8f}")
+        print(f"time_mean_bias min: {vmin:0.8f}")
+        print(f"time_mean_bias max: {vmax:0.8f}")
+        print(f"baseline_time_mean_bias min: {vminb:0.8f}")
+        print(f"baseline_time_mean_bias max: {vmaxb:0.8f}")
     fig, axs = plot_time_mean(
         time_mean_bias,
         baseline_time_mean_bias,
         var_name=var_name,
         metric_name="bias",
         figsize=figsize,
-        verbose=verbose,
         norm=norm,
         cmap=cmap,
     )
@@ -175,28 +204,42 @@ def plot_time_mean_list(
         vmins = [bias.min().item() for bias in time_mean]
         vmaxs = [bias.max().item() for bias in time_mean]
         vmax_abs = max(abs(min(vmins)), abs(max(vmaxs)))
-    else:
-        verbose = False
 
     if metric_name is None:
         metric_name = ""
 
-    for i, bias in enumerate(time_mean):
+    for i, tm in enumerate(time_mean):
+        btm = baseline_time_mean[i]
         if verbose:
             prefix = (
-                f"time_mean[i] {metric_name}"
+                f"time_mean[i], {metric_name}"
                 if var_names is None
-                else f"Time-mean {var_names[i]} {metric_name}"
+                else f"time_mean[i], {var_names[i]} {metric_name}"
             )
-            print(f"{prefix} minimum: {vmins[i]:0.8f}")
-            print(f"{prefix} maximum: {vmaxs[i]:0.8f}")
-        baseline_time_mean[i].plot(
+            vmin, vmax = tm.min().item(), tm.max().item()
+            vminb, vmaxb = btm.min().item(), btm.max().item()
+            wgts = np.cos(np.deg2rad(tm["lat"]))
+            print(f"{prefix}, (min, max): {vmin:0.8f}, {vmax:0.8f}")
+            print(
+                f"{prefix}, area-weighted mean: {compute_global_time_mean_bias(tm, wgts):0.8f}"
+            )
+            print(
+                f"{prefix}, area-weighted RMSE: {compute_rmse_of_global_time_mean_bias(tm, wgts):0.8f}"
+            )
+            print(f"baseline_{prefix} (min, max): {vminb:0.8f}, {vmaxb:0.8f}")
+            print(
+                f"baseline_{prefix}, area-weighted mean: {compute_global_time_mean_bias(btm, wgts):0.8f}"
+            )
+            print(
+                f"baseline_{prefix}, area-weighted RMSE: {compute_rmse_of_global_time_mean_bias(btm, wgts):0.8f}"
+            )
+        btm.plot(
             ax=axs[i][0],
             norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),
             cmap="RdBu_r",
             add_colorbar=False,
         )
-        im = bias.plot(
+        im = tm.plot(
             ax=axs[i][1],
             norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),
             cmap="RdBu_r",
@@ -263,7 +306,7 @@ def plot_time_mean_bias_list(
     axs=None,
     verbose=False,
 ):
-    fig, axs = plot_time_mean_list(
+    out = plot_time_mean_list(
         time_mean_bias,
         baseline_time_mean_bias,
         var_names=var_names,
@@ -273,7 +316,7 @@ def plot_time_mean_bias_list(
         axs=axs,
         verbose=verbose,
     )
-    return fig, axs
+    return out
 
 
 def plot_time_mean_rmse_list(

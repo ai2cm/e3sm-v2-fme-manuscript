@@ -83,19 +83,18 @@ def open_autoregressive_inference(
     time_coords = xr.cftime_range(
         start=start, freq=step_freq, periods=len(ds[step_dim]), calendar=calendar
     )
-    ds = (
-        ds.rename({step_dim: "time"})
-        .assign_coords(
-            {
-                "time": ("time", time_coords),
-                "lat": (
-                    "lat",
-                    np.flip(ds["lat"].values) if flip_lat else ds["lat"].values,
-                ),
-            }
-        )
-        .isel(lat=slice(None, None, -1))
+    ds = ds.rename({step_dim: "time"}).assign_coords(
+        {
+            "time": ("time", time_coords),
+            "lat": (
+                "lat",
+                np.flip(ds["lat"].values) if flip_lat else ds["lat"].values,
+            ),
+        }
     )
+    if flip_lat:
+        ds = ds.isel(lat=slice(None, None, -1))
+
     return ds
 
 

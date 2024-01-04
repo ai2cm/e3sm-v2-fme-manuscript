@@ -112,8 +112,8 @@ def open_reference(
         start=start, freq=step_freq, periods=len(ds[step_dim]), calendar=calendar
     )
     ds["time"] = time_coords
-    with dask.config.set(**{"array.slicing.split_large_chunks": True}):
-        ds = ds.reindex(lat=list(reversed(ds["lat"])))
+    # with dask.config.set(**{"array.slicing.split_large_chunks": True}):
+    #     ds = ds.reindex(lat=list(reversed(ds["lat"])))
     ds["lat"] = lat_coords
     return ds
 

@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import xarray as xr
@@ -76,7 +76,20 @@ def compute_histograms(
     return xr.Dataset({"hist": samples, "bin_edges": bin_edges})
 
 
-def plot_time_mean_histogram(ds: xr.Dataset, sample=0, figsize=(10, 5), **hist_kwargs):
+def plot_time_mean_histogram(
+    ds: xr.Dataset,
+    sample=0,
+    figsize=(10, 5),
+    labels: Optional[Dict[str, str]] = None,
+    **hist_kwargs
+):
+    if labels is None:
+        labels = {"target": "Target", "prediction": "Prediction"}
+    else:
+        assert set(labels.keys()) == {
+            "target",
+            "prediction",
+        }, "labels must be a dict with keys 'target' and 'prediction'"
     fig, ax = plt.subplots(1, 1, figsize=figsize, layout="constrained")
     ds = ds.sel(sample=sample)
     bin_edges = ds["bin_edges"].values
@@ -88,7 +101,7 @@ def plot_time_mean_histogram(ds: xr.Dataset, sample=0, figsize=(10, 5), **hist_k
         weights=tar_hist_mean,
         color="k",
         linestyle="--",
-        label="Target",
+        label=labels["target"],
         **hist_kwargs
     )
     _ = ax.hist(
@@ -97,7 +110,7 @@ def plot_time_mean_histogram(ds: xr.Dataset, sample=0, figsize=(10, 5), **hist_k
         weights=gen_hist_mean,
         color="g",
         linestyle="-",
-        label="Generated",
+        label=labels["prediction"],
         **hist_kwargs
     )
     return fig, ax

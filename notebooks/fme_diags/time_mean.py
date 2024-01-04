@@ -210,6 +210,13 @@ def plot_time_mean_list(
 
     for i, tm in enumerate(time_mean):
         btm = baseline_time_mean[i]
+        wgts = np.cos(np.deg2rad(tm["lat"]))
+        tm_bias = compute_global_time_mean_bias(tm, wgts)
+        btm_bias = compute_global_time_mean_bias(btm, wgts)
+        tm_rmse = compute_rmse_of_global_time_mean_bias(tm, wgts)
+        btm_rmse = compute_rmse_of_global_time_mean_bias(btm, wgts)
+        tm_str = f"RMSE = {tm_rmse:0.2f}, bias = {tm_bias:0.2f}"
+        btm_str = f"RMSE = {btm_rmse:0.2f}, bias = {btm_bias:0.2f}"
         if verbose:
             prefix = (
                 f"time_mean[i], {metric_name}"
@@ -244,6 +251,22 @@ def plot_time_mean_list(
             norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),
             cmap="RdBu_r",
             add_colorbar=False,
+        )
+        axs[i][0].text(
+            0.5,
+            0.02,
+            btm_str,
+            transform=axs[i][0].transAxes,
+            fontsize="large",
+            horizontalalignment="center",
+        )
+        axs[i][1].text(
+            0.5,
+            0.02,
+            tm_str,
+            transform=axs[i][1].transAxes,
+            fontsize="large",
+            horizontalalignment="center",
         )
         if i == 0:
             axs[i][0].set_title("Reference", fontsize="x-large")

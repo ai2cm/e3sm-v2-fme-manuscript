@@ -131,8 +131,8 @@ variables:
       specific_total_water_6: $q_6^T$
       specific_total_water_7: $q_7^T$
     diagnostic:
-      top_of_atmos_upward_shortwave_flux: $USW_{toa}$
-      FLUT: $ULW_{toa}$
+      top_of_atmos_upward_shortwave_flux: $RSW$
+      FLUT: $OLR$
       FSDS: $DSW_{sfc}$
       FLDS: $DLW_{sfc}$
       surface_upward_shortwave_flux: $USW_{sfc}$

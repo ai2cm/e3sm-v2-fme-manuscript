@@ -1,4 +1,4 @@
-from typing import Literal, Tuple
+from typing import Dict, Literal, Optional, Tuple
 
 import numpy as np
 import xarray as xr
@@ -63,6 +63,7 @@ def plot_wavenumber_frequency_spectra(
     mjo_zoom: bool = False,
     num_contour_bins=14,
     figsize=(16, 5),
+    labels: Optional[Dict[str, str]] = None,
 ):
     """Plot the target and predicted power spectra on a log10 scale, along with
     the relative error.
@@ -84,6 +85,14 @@ def plot_wavenumber_frequency_spectra(
 
     if component == "background":
         normalize = False
+
+    if labels is None:
+        labels = {"target": "Target", "prediction": "Prediction"}
+    else:
+        assert set(labels.keys()) == {
+            "target",
+            "prediction",
+        }, "labels must be a dict with keys 'target' and 'prediction'"
 
     power = {}
     for source in ds["source"].values:
@@ -111,7 +120,7 @@ def plot_wavenumber_frequency_spectra(
         power["target"],
         clevs=bin_edges[1:-1],
         varName="surface_precipitation_rate",
-        sourceID="Target",
+        sourceID=labels["target"],
         do_zoom=mjo_zoom,
         add_colorbar=False,
         ax=axs_flat[0],
@@ -122,7 +131,7 @@ def plot_wavenumber_frequency_spectra(
         power["prediction"],
         clevs=bin_edges[1:-1],
         varName="surface_precipitation_rate",
-        sourceID="Generated",
+        sourceID=labels["prediction"],
         do_zoom=mjo_zoom,
         add_colorbar=False,
         add_labels=False,

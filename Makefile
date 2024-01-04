@@ -14,6 +14,7 @@ create_jupyter_kernel: create_environment
 
 .PHONY: run_notebooks
 
+# use run_notebook_figures to run the notebook that generates the manuscript figures
 run_notebook_%:
 	conda env config vars set -n $(ENVIRONMENT_NAME) \
 		RUN_KEY=$(RUN_KEY) REFERENCE_KEY=$(REFERENCE_KEY)
@@ -30,4 +31,5 @@ run_notebook_%:
 		--output=$*.ipynb \
 		notebooks/$*.ipynb
 
+# all notebooks other than figures.ipynb
 run_notebooks_%: $(addprefix run_notebook_, $(NOTEBOOKS))

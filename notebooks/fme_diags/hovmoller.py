@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import numpy as np
 import xarray as xr
@@ -42,24 +42,28 @@ def plot_hovmoller_by_lon(
     var_name: Optional[str] = None,
     figsize=(6, 12),
     time_label="Simulation time",
+    labels: Optional[Dict[str, str]] = None,
     **plot_kwargs,
 ):
-    fig, axs = plt.subplots(1, 2, figsize=figsize, sharey=True)
+    n_col = da.sizes["source"]
+    fig, axs = plt.subplots(1, n_col, figsize=figsize, sharey=True)
 
-    da.sel(source="target").plot(ax=axs[0], add_colorbar=False, **plot_kwargs)
-    im = da.sel(source="prediction").plot(
-        ax=axs[1],
-        add_colorbar=False,
-        **plot_kwargs,
-    )
+    if labels is None:
+        labels = {"target": "Target", "prediction": "Prediction"}
 
-    axs[0].set_title("Target")
+    assert set(labels.keys()) == set(
+        da["source"].values
+    ), "labels keys must match da['source']"
+
+    for i, (source, label) in enumerate(labels.items()):
+        im = da.sel(source=source).plot(ax=axs[i], add_colorbar=False, **plot_kwargs)
+        axs[i].set_title(label)
+        axs[i].set_xlabel("Longitude")
+        if i > 0:
+            axs[i].set_ylabel("")
+            axs[i].yaxis.set_tick_params(labelleft=False)
+
     axs[0].set_ylabel(time_label)
-    axs[0].set_xlabel("Longitude")
-    axs[1].set_title("Generated")
-    axs[1].set_ylabel("")
-    axs[1].yaxis.set_tick_params(labelleft=False)
-    axs[1].set_xlabel("Longitude")
 
     plt.tight_layout()
 

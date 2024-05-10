@@ -5,12 +5,13 @@ NOTEBOOKS = daily-precip-pdf daily-precip-zonal-mean-spectrum precip-biases toa-
 
 # recommended to deactivate current conda environment before running this
 create_environment:
-	conda create -n $(ENVIRONMENT_NAME) python=3.8 pip
+	conda create -n $(ENVIRONMENT_NAME) python=3.8 pip cartopy
 	conda run -n $(ENVIRONMENT_NAME) pip install -r notebooks/requirements.txt
 
 create_jupyter_kernel: create_environment
 	conda run -n $(ENVIRONMENT_NAME) python -m ipykernel install --user \
-		--name $(ENVIRONMENT_NAME) --display-name "Python [conda:${ENVIRONMENT_NAME}]"
+		--name $(ENVIRONMENT_NAME) --display-name "Python [conda:${ENVIRONMENT_NAME}]" \
+		--env PATH /global/common/software/nersc/pm-2023q2/sw/texlive/2022/bin/x86_64-linux:\${PATH}
 
 .PHONY: run_notebooks
 

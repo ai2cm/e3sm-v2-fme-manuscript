@@ -1,5 +1,5 @@
 import os
-from typing import Mapping, Optional
+from typing import List, Mapping, Optional
 
 import dask
 import numpy as np
@@ -16,13 +16,15 @@ def load_config(path: os.PathLike):
 
 def get_run_path(config: dict, key: str):
     run_config = config["runs"][key]
-    base_dir = run_config.get("dataset_dir", config["dataset_dir"])
-    dset_name = run_config["dataset"]
-    group = run_config["group"]
-    name = run_config["name"]
-    return os.path.join(
-        base_dir, dset_name, "output", group, name, "autoregressive_predictions.nc"
-    )
+    base_dir = run_config.get("base_dir", config["dataset_dir"])
+    if "slurm_inference_run_id" in run_config:
+        run_dir = os.path.join(base_dir, run_config["slurm_inference_run_id"])
+    else:
+        dset_name = run_config["dataset"]
+        group = run_config["group"]
+        name = run_config["name"]
+        run_dir = os.path.join(base_dir, dset_name, "output", group, name)
+    return os.path.join(run_dir, "autoregressive_predictions.nc")
 
 
 def get_run_kwargs(config: dict, key: str):
@@ -122,21 +124,45 @@ def load_global_time_mean_metrics(
     wandb_run,
     keys_stem: str,
     vars_dict: dict,
-    run_label: Optional[str] = None,
+    run_label: str,
     apply_funcs: Optional[dict] = None,
+    run_label_as_column: bool = False,
 ):
     keys = {f"{keys_stem}/{name}": label for name, label in vars_dict.items()}
     metric_names = list(keys.keys())
-    metrics = (
-        wandb_run.history(keys=metric_names, samples=1)
-        .rename(dict(zip(metric_names, vars_dict.keys())), axis=1)
-        .drop("_step", axis=1)
-    )
+    samples = 1 if run_label_as_column else 500
+    df = wandb_run.history(keys=metric_names, samples=samples)
+    df = df.rename(dict(zip(metric_names, vars_dict.keys())), axis=1)
+    if run_label_as_column:
+        df = df.drop("_step", axis=1)
+    else:
+        df = df.set_index("_step")
     if apply_funcs is not None:
         for name, func in apply_funcs.items():
-            metrics[name] = metrics[name].apply(func)
-    if run_label is not None:
-        metrics.index = [run_label]
-    return metrics.T.join(
-        pd.DataFrame.from_dict(vars_dict, orient="index", columns=["label"])
+            df[name] = df[name].apply(func)
+    if run_label_as_column:
+        df.index = [run_label]
+        return df.T.join(
+            pd.DataFrame.from_dict(vars_dict, orient="index", columns=["label"])
+        )
+    new_index = pd.MultiIndex.from_product(
+        [[run_label], df.index], names=["run", df.index.name]
     )
+    return df.set_index(new_index)
+
+
+def melt_training_steps(
+    df: pd.DataFrame,
+    id_vars: Optional[List[str]] = None,
+):
+    """
+    df: pd.DataFrame
+        A wide format DataFrame, e.g. the output of
+        load_global_time_mean_metrics when inference=False.
+    id_vars: Optional[List[str]]
+        Passed to pd.melt.
+    """
+    if id_vars is None:
+        id_vars = list(df.index.names)
+    df_long = pd.melt(df.reset_index(), id_vars=id_vars)
+    return df_long.set_index(id_vars + ["variable"])

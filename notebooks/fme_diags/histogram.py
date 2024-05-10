@@ -81,6 +81,7 @@ def plot_time_mean_histogram(
     sample=0,
     figsize=(10, 5),
     labels: Optional[Dict[str, str]] = None,
+    ax=None,
     **hist_kwargs
 ):
     if labels is None:
@@ -90,7 +91,10 @@ def plot_time_mean_histogram(
             "target",
             "prediction",
         }, "labels must be a dict with keys 'target' and 'prediction'"
-    fig, ax = plt.subplots(1, 1, figsize=figsize, layout="constrained")
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize, layout="constrained")
+    else:
+        fig = None
     ds = ds.sel(sample=sample)
     bin_edges = ds["bin_edges"].values
     tar_hist_mean = ds["hist"].sel(source="target").mean(dim="time").values

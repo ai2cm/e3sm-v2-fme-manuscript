@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import cartopy.crs as ccrs
 import numpy as np
@@ -8,14 +8,18 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 
 
-def compute_time_mean_bias(da_pred: xr.DataArray, da_tar: xr.DataArray):
+def compute_time_mean_bias(
+    da_pred: Union[xr.DataArray, xr.Dataset], da_tar: Union[xr.DataArray, xr.Dataset]
+):
     bias = da_pred - da_tar
     with ProgressBar():
         time_mean_bias = bias.mean("time").compute()
     return time_mean_bias
 
 
-def compute_time_mean_rmse(da_pred: xr.DataArray, da_tar: xr.DataArray):
+def compute_time_mean_rmse(
+    da_pred: Union[xr.DataArray, xr.Dataset], da_tar: Union[xr.DataArray, xr.Dataset]
+):
     rmse = np.sqrt((da_pred - da_tar) ** 2)
     with ProgressBar():
         time_mean_rmse = rmse.mean("time").compute()
@@ -23,7 +27,7 @@ def compute_time_mean_rmse(da_pred: xr.DataArray, da_tar: xr.DataArray):
 
 
 def compute_global_time_mean_bias(
-    bias: xr.DataArray, area_weights: Optional[xr.DataArray] = None
+    bias: Union[xr.DataArray, xr.Dataset], area_weights: Optional[xr.DataArray] = None
 ):
     if "time" in bias.dims:
         with ProgressBar():
@@ -34,7 +38,7 @@ def compute_global_time_mean_bias(
 
 
 def compute_rmse_of_global_time_mean_bias(
-    bias: xr.DataArray, area_weights: Optional[xr.DataArray] = None
+    bias: Union[xr.DataArray, xr.Dataset], area_weights: Optional[xr.DataArray] = None
 ):
     if "time" in bias.dims:
         with ProgressBar():

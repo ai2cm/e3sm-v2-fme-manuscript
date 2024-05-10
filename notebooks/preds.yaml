@@ -76,11 +76,13 @@ runs:
     dataset: 2023-11-22-e3smv2-vertically-resolved-1deg-fme-dataset
     group: 42-years-training-set
     name: 42yrs-batch_size8-max_epochs50-lr3e-4-run4
+    training_run_id: hj77jc73
     inference_run_id: 16ix0826
   42yrs-batch_size8-max_epochs50-lr3e-4-run4-ema:
     dataset: 2023-11-22-e3smv2-vertically-resolved-1deg-fme-dataset
     group: 42-years-training-set
     name: 42yrs-batch_size8-max_epochs50-lr3e-4-run4-ema
+    training_run_id: hj77jc73
     inference_run_id: 3hvzyhgv
   fv3gfs-0shot-42yrs-batch_size8-max_epochs50-lr3e-4-run0:
     dataset: 2023-12-03-fv3gfs
@@ -89,6 +91,105 @@ runs:
     inference_run_id: igb8x3mu
     start: "2021-01-01"
     calendar: standard
+  fv3gfs_finetune_embed_block7_dec_lr3e-4_ep10-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_training_run_id: "24616134"
+    training_run_id: 55y660uy
+    inference_run_id: u3qjvb4d
+  fv3gfs_full_finetuning_lr3e-4_ep10-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_training_run_id: "24649067"
+    training_run_id: h7j9jz7u
+    inference_run_id: 27r9fzjy
+  fv3gfs_finetune_embed_enc_block7_dec_lr3e-4_ep10-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_training_run_id: "24638532"
+    training_run_id: 1dfj5p0r
+    inference_run_id: nveft66g
+  fv3gfs_zero_shot-run00:
+    inference_run_id: ztdnyuyz
+  fv3gfs_zero_shot-run01:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912653"
+    inference_run_id: t5ckw8kh
+    step_dim: time
+  fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep5-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_training_run_id: "24711614"
+    training_run_id: xm4vw2t4
+    inference_run_id: 7exbc2xr
+  fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep10-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_training_run_id: "24724094"
+    training_run_id: hvqgj1af
+    inference_run_id: pik88973
+  fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep20-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_training_run_id: "24711475"
+    training_run_id: oto2ats3
+    inference_run_id: 0ben3bow
+  fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep20-run01:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_training_run_id: "24711475"
+    slurm_inference_run_id: "24912732"
+    training_run_id: oto2ats3
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_finetune_noValidEMA_LpLoss_embed_block7_dec_lr3e-4_ep10-run00:
+    inference_run_id: 3ajdit55
+  fv3gfs_orig_norm-ic_0011-run00:
+    inference_run_id: pl5ij92c
+  fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep5-ic_0011-norm-run00:
+    inference_run_id: pujc1cv4
+  fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep10-ic_0011-norm-run00:
+    inference_run_id: 5nrjqgv6
+  fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep20-ic_0011-norm-run00:
+    inference_run_id: j5jfyavg
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.1-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912890"
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.2-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912891"
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.3-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912892"
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.4-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912893"
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.5-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912894"
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.6-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912895"
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.7-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912896"
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.8-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912897"
+    inference_run_id: null # TODO
+    step_dim: time
+  fv3gfs_hybrid_task_vector_full_finetuning_ep20-lambda0.9-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_inference_run_id: "24912899"
+    inference_run_id: null # TODO
+    step_dim: time
 wandb_metrics:
   inference:
     bias: inference/time_mean/bias
@@ -120,7 +221,7 @@ variables:
       T_4: $T_4$
       T_5: $T_5$
       T_6: $T_6$
-      T_7: $T_6$
+      T_7: $T_7$
       TS: $T_s$
       specific_total_water_0: $q_0^T$
       specific_total_water_1: $q_1^T$

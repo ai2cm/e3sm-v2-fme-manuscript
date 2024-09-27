@@ -113,6 +113,11 @@ runs:
     slurm_inference_run_id: "24912653"
     inference_run_id: t5ckw8kh
     step_dim: time
+  fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep1-run00:
+    base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
+    slurm_training_run_id: "25478644"
+    training_run_id: gvw3av9q
+    inference_run_id: w9j8cxvw
   fv3gfs_noValidEMA_LpLoss_full_finetuning_lr3e-4_ep5-run00:
     base_dir: /pscratch/sd/j/jpduncan/ai2/fme-output
     slurm_training_run_id: "24711614"

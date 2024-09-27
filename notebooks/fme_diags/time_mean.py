@@ -223,7 +223,7 @@ def plot_time_mean_list(
         btm_str = f"RMSE = {btm_rmse:0.2f}, bias = {btm_bias:0.2f}"
         if verbose:
             prefix = (
-                f"time_mean[i], {metric_name}"
+                f"time_mean[{i}], {metric_name}"
                 if var_names is None
                 else f"time_mean[i], {var_names[i]} {metric_name}"
             )
@@ -244,15 +244,16 @@ def plot_time_mean_list(
             print(
                 f"baseline_{prefix}, area-weighted RMSE: {compute_rmse_of_global_time_mean_bias(btm, wgts):0.8f}"
             )
+        norm = TwoSlopeNorm(0.0, -vmax_abs, vmax_abs)
         btm.plot(
             ax=axs[i][0],
-            norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),
+            norm=norm,
             cmap="RdBu_r",
             add_colorbar=False,
         )
         im = tm.plot(
             ax=axs[i][1],
-            norm=TwoSlopeNorm(0.0, -vmax_abs, vmax_abs),
+            norm=norm,
             cmap="RdBu_r",
             add_colorbar=False,
         )
